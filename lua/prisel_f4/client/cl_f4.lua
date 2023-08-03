@@ -1,13 +1,3 @@
-/*
- * -------------------------
- * • Fichier: cl_f4.lua
- * • Projet: client
- * • Création : Wednesday, 12th July 2023 6:22:03 pm
- * • Auteur : Ekali
- * • Modification : Thursday, 13th July 2023 2:41:40 am
- * • Destiné à Prisel.fr en V3
- * -------------------------
- */
  local mainPanel = nil
  local mainChilds = {}
  local categories = {}
@@ -71,10 +61,12 @@
      local jobModel = vgui.Create("DModelPanel", detailsPanel)
      jobModel:SetSize(detailsPanel:GetWide() * 0.6, detailsPanel:GetWide() * 0.6)
      jobModel:SetPos(detailsPanel:GetWide()*-0.05, detailsPanel:GetTall() * 0.14)
+
      local model = string.find(jobTBL.model[1], "models/") and jobTBL.model[1] or jobTBL.model
      jobModel:SetModel(model)
      jobModel:SetMouseInputEnabled(false)
      jobModel:SetFOV(60)
+
    end
  
    function detailsPanel:Think()
@@ -274,6 +266,12 @@
          jobModel:SetSize(jobPanel:GetWide() * 0.58, jobPanel:GetWide() * 0.58)
          jobModel:SetPos(jobPanel:GetWide() / 2 - jobModel:GetWide() / 2, jobPanel:GetTall() * 0.2)
          jobModel:SetModel(model)
+
+         function jobModel:Paint()
+            surface.SetDrawColor(DarkRP.Config.Colors["Secondary"])
+            surface.DrawOutlinedRect(0, 0, self:GetWide(), self:GetTall(), 4)
+            self:DrawModel()
+         end
        end
  
  
