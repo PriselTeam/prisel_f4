@@ -4,10 +4,9 @@
  local detailsPanel = nil
  PriselHUD = PriselHUD or {}
  local P3F4Frame = nil
- 
+
  local infosServ = {
    ["connect"] = 0,
-   ["disconnect"] = 0,
    ["kill"] = 0,
    ["death"] = 0,
  }
@@ -262,19 +261,35 @@
            surface.DrawTexturedRect(0, 0, w, h)
          end
        else
-         jobModel = vgui.Create("SpawnIcon", jobPanel)
+
+         jobModel = vgui.Create("DModelPanel", jobPanel)
          jobModel:SetSize(jobPanel:GetWide() * 0.58, jobPanel:GetWide() * 0.58)
          jobModel:SetPos(jobPanel:GetWide() / 2 - jobModel:GetWide() / 2, jobPanel:GetTall() * 0.2)
          jobModel:SetModel(model)
+         jobModel:SetFOV(20)
 
-         function jobModel:Paint()
-            surface.SetDrawColor(DarkRP.Config.Colors["Secondary"])
-            surface.DrawOutlinedRect(0, 0, self:GetWide(), self:GetTall(), 4)
-            self:DrawModel()
+          function jobModel:LayoutEntity(ent)
+            ent:SetAngles(Angle(0, 45, 0))
+            ent:SetPos(Vector(0, 0, -22))
+            ent:SetEyeTarget(Vector(0, 0, 64))
+          end
+
+         jobModel.dPaint = jobModel.Paint
+
+         function jobModel:Paint(w,h)
+
+             DarkRP.Library.DrawArc(w/2, h/2, 0, 360, 65, DarkRP.Config.Colors["Secondary"])
+             DarkRP.Library.DrawStencilMask(function()
+                 DarkRP.Library.DrawArc(w/2, h/2, 0, 360, 65, color_white)
+             end, function()
+                 jobModel.dPaint(self,w,h)
+             end, false)
+
+
          end
-       end
- 
- 
+
+       end 
+
        function jobModel:OnMousePressed()
          openDetailsJob(o)
        end
@@ -420,7 +435,7 @@
        entitiesModel:SetLookAt((mn + mx) * 0.5)
  
        local buttonBuy = vgui.Create("Prisel.Button", entityPanel)
-       buttonBuy:SetSize(entityPanel:GetWide() * 0.95, entityPanel:GetTall() * 0.18)
+       buttonBuy:SetSize(entityPanel:GetWide() * 0.9, entityPanel:GetTall() * 0.18)
        buttonBuy:SetPos(entityPanel:GetWide() / 2 - buttonBuy:GetWide() / 2, entityPanel:GetTall()*0.805)
        buttonBuy:SetText(DarkRP.formatMoney(o.price))
        buttonBuy:SetFont(DarkRP.Library.Font(7.3, 0, "Montserrat Bold"))
@@ -491,12 +506,13 @@
    cardPlayerWallet:SetSize(DarkRP.ScrW * .12, DarkRP.ScrW * .12)
    cardPlayerWallet:SetPos(DarkRP.ScrW*0.135, DarkRP.ScrH*0.05)
    
-   function cardPlayerWallet:Paint(w, h)
-     draw.RoundedBox(0, 0, 0, w, h, DarkRP.Config.Colors["Main"])
-     surface.SetDrawColor(color_white)
-     surface.SetMaterial(DarkRP.Library.FetchCDN("prisel_hud/portefeuille"))
-     surface.DrawTexturedRect(w/2 - w*0.3, h/2-h*0.3, w * 0.6, h * 0.6)
-   end
+  function cardPlayerWallet:Paint(w, h)
+    draw.RoundedBox(0, 0, 0, w, h, DarkRP.Config.Colors["Main"])
+
+    surface.SetDrawColor(color_white)
+    surface.SetMaterial(DarkRP.Library.FetchCDN("prisel_hud/portefeuille"))
+    surface.DrawTexturedRect(w/2 - w*0.3, h/2-h*0.3, w * 0.6, h * 0.6)
+  end
  
    local cardPlayerWalletText = vgui.Create("DLabel", cardPlayerWallet)
    cardPlayerWalletText:SetText("Porte-monnaie")
@@ -613,7 +629,6 @@
    cardGraphAmount:SetSize(cardGraph:GetWide() * 0.9, cardGraph:GetTall() * 0.8)
    cardGraphAmount:SetPos(cardGraph:GetWide() * 0.05, cardGraph:GetTall() * 0.15)
    cardGraphAmount:AddData("Connexions", infosServ["connect"])
-   cardGraphAmount:AddData("Déconnexions", infosServ["disconnect"])
    cardGraphAmount:AddData("Tués", infosServ["kill"])
    cardGraphAmount:AddData("Morts", infosServ["death"])
  end
@@ -798,7 +813,7 @@
    leftPanel:DockMargin(0, P3F4Frame:GetTall() * 0.092, 0, 0)
  
    function leftPanel:Paint(w, h)
-     draw.RoundedBox(DarkRP.Config.RoundedBoxValue, 0, 0, w, h, DarkRP.Library.ColorNuance(DarkRP.Config.Colors["Secondary"], 15))
+     draw.RoundedBox(0, 0, 0, w, h, DarkRP.Library.ColorNuance(DarkRP.Config.Colors["Secondary"], 15))
    end
  
    for k, v in pairs(buttonsF4) do
@@ -866,7 +881,14 @@
  end
  
  hook.Add("ShowSpare2", "Prisel:V3::OpenF4", openF4)
- 
- net.Receive("PriselV3::F4:Graph:SendInfos", function()
-   infosServ = net.ReadTable()
- end)
+
+net.Receive("PriselV3::F4:Graph:SendInfos", function()
+  infosServ = {}
+  local connect = net.ReadUInt(32)
+  local kill = net.ReadUInt(32)
+  local death = net.ReadUInt(32)
+
+  infosServ["connect"] = connect
+  infosServ["kill"] = kill
+  infosServ["death"] = death
+end)
