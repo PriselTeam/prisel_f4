@@ -273,21 +273,6 @@
             ent:SetPos(Vector(0, 0, -22))
             ent:SetEyeTarget(Vector(0, 0, 64))
           end
-
-         jobModel.dPaint = jobModel.Paint
-
-         function jobModel:Paint(w,h)
-
-             DarkRP.Library.DrawArc(w/2, h/2, 0, 360, 65, DarkRP.Config.Colors["Secondary"])
-             DarkRP.Library.DrawStencilMask(function()
-                 DarkRP.Library.DrawArc(w/2, h/2, 0, 360, 65, color_white)
-             end, function()
-                 jobModel.dPaint(self,w,h)
-             end, false)
-
-
-         end
-
        end 
 
        function jobModel:OnMousePressed()
