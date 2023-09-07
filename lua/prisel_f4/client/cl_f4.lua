@@ -4,6 +4,28 @@
  local detailsPanel = nil
  PriselHUD = PriselHUD or {}
  local P3F4Frame = nil
+ 
+ local commandsList = {
+  [1] = {
+    ["label"] = "Changer de Nom RP",
+    ["hasCb"] = true,
+    ["queryString"] = "Nouveau Nom RP",
+    ["cmd"] = "darkrp rpname \"%s\"",
+  },
+
+  [2] = {
+    ["label"] = "Jeter de l'argent",
+    ["hasCb"] = true,
+    ["queryString"] = "Montant d'argent à jeter",
+    ["cmd"] = "darkrp dropmoney \"%s\"",
+  },
+
+  [3] = {
+    ["label"] = "Vendre ses portes",
+    ["cmd"] = "darkrp sellalldoors",
+  },
+
+ }
 
  local infosServ = {
    ["connect"] = 0,
@@ -749,10 +771,63 @@
    end
  end
 
+ function createCommandsPanel(mainPanel)
+    local commandsPanel = vgui.Create("DPanel", mainPanel)
+    mainChilds["commandsPanel"] = commandsPanel
+    commandsPanel:Dock(FILL)
+    commandsPanel:SetAlpha(0)
+    commandsPanel:AlphaTo(255, 0.2, 0)
+    commandsPanel:DockMargin(mainPanel:GetWide() * 0.01, mainPanel:GetWide() * 0.01, mainPanel:GetWide() * 0.01, mainPanel:GetWide() * 0.01)
+  
+    function commandsPanel:Paint(w, h)
+      draw.RoundedBox(DarkRP.Config.RoundedBoxValue, 0, 0, w, h, DarkRP.Library.ColorNuance(DarkRP.Config.Colors["Secondary"], 15))
+      draw.SimpleText("Commandes", DarkRP.Library.Font(12, 0, "Montserrat Bold"), w * 0.5, h * 0.035, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    end
+  
+    local commandsScroll = vgui.Create("DScrollPanel", commandsPanel)
+    commandsScroll:Dock(FILL)
+    commandsScroll:DockMargin(commandsPanel:GetWide() * 0.4, commandsPanel:GetWide() * 0.85, commandsPanel:GetWide() * 0.4, commandsPanel:GetWide() * 0.4)
+    commandsScroll:GetVBar():SetWide(0)
+    
+
+    /*
+        ["label"] = "Changer de Nom RP",
+    ["hasCb"] = true,
+    ["queryString"] = "Nouveau Nom RP",
+    ["cmd"] = "rpname \"%s\"",
+  */
+
+    for k, v in ipairs(commandsList) do
+      local commandButton = vgui.Create("Prisel.Button", commandsScroll)
+      commandButton:Dock(TOP)
+      commandButton:DockMargin(commandsScroll:GetWide() * 0.05, commandsScroll:GetWide() * 0.05, commandsScroll:GetWide() * 0.05, commandsScroll:GetWide() * 0.05)
+      commandButton:SetText(v["label"])
+
+      function commandButton:DoClick()
+
+        if v["hasCb"] and v["queryString"] ~= nil then
+          Derma_StringRequest(
+            "Commandes F4",
+            v["queryString"],
+            "",
+            function(text)
+              LocalPlayer():ConCommand(string.format(v["cmd"], text))
+            end
+          )
+        else
+          LocalPlayer():ConCommand(v["cmd"])
+        end
+
+      end
+
+    end
+  end
+
  local buttonsF4 = {
    { Name = "Acceuil", func = showDashboard },
    { Name = "Métiers", func = createJobsPanel },
    { Name = "Entités", func = createEntitiesPanel },
+   { Name = "Commandes", func = createCommandsPanel},
    { Name = "Armes", func = createWeaponsPanel, customCheck = function()
      return (team.GetName(LocalPlayer():Team()) == "Vendeur d'armes") or (team.GetName(LocalPlayer():Team()) == "Marchand Noir")
    end },
