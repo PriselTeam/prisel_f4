@@ -10,7 +10,7 @@
    ["kill"] = 0,
    ["death"] = 0,
  }
- 
+
  local function removeValidPanels()
    local validPanels = {}
    for k, v in pairs(mainChilds) do
@@ -262,17 +262,10 @@
          end
        else
 
-         jobModel = vgui.Create("DModelPanel", jobPanel)
+         jobModel = vgui.Create("SpawnIcon", jobPanel)
          jobModel:SetSize(jobPanel:GetWide() * 0.58, jobPanel:GetWide() * 0.58)
          jobModel:SetPos(jobPanel:GetWide() / 2 - jobModel:GetWide() / 2, jobPanel:GetTall() * 0.2)
          jobModel:SetModel(model)
-         jobModel:SetFOV(20)
-
-          function jobModel:LayoutEntity(ent)
-            ent:SetAngles(Angle(0, 45, 0))
-            ent:SetPos(Vector(0, 0, -22))
-            ent:SetEyeTarget(Vector(0, 0, 64))
-          end
        end 
 
        function jobModel:OnMousePressed()
@@ -755,12 +748,11 @@
      end
    end
  end
- 
+
  local buttonsF4 = {
    { Name = "Acceuil", func = showDashboard },
    { Name = "Métiers", func = createJobsPanel },
    { Name = "Entités", func = createEntitiesPanel },
-   { Name = "Commandes", func = function() print("ok") end},
    { Name = "Armes", func = createWeaponsPanel, customCheck = function()
      return (team.GetName(LocalPlayer():Team()) == "Vendeur d'armes") or (team.GetName(LocalPlayer():Team()) == "Marchand Noir")
    end },
@@ -773,7 +765,7 @@
    P3F4Frame:SetSize(ScrW() * 0.8, ScrH() * 0.8)
    P3F4Frame:Center()
    P3F4Frame:MakePopup()
-   P3F4Frame:SetTitle("Menu Principal - Prisel.fr")
+   P3F4Frame:SetTitle("LeDarkRP - Prisel.fr")
    P3F4Frame:SetDescription("Le seul serveur géré par la communautée !")
    net.Start("PriselV3::F4:Graph:SendInfos")
    net.SendToServer()
